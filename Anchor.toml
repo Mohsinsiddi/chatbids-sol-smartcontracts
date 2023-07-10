@@ -1,14 +1,14 @@
 [features]
 seeds = false
 skip-lint = false
-[programs.localnet]
-chatbids = "855UzS1Q9FPctVzgUzL8k4P7dT3aAdF3k7uoXDdWUvEV"
+[programs.devnet]
+chatbids = "ZzS7SCJrNP4qw7yjEM8WeKYNa1HtEPnFWokof6D5nku"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "devnet"
 wallet = "/Users/siddi_404/.config/solana/id.json"
 
 [scripts]

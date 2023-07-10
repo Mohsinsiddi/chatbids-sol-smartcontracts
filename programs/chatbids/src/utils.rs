@@ -1,6 +1,5 @@
 use crate::constants::{
-    BUYER_POINT_SHARE, BUYER_TEAM_MULTISIG_SHARE, SELLER_POINT_SHARE, SELLER_TEAM_MULTISIG_SHARE,
-    STAKING_SHARE, TRADING_REWARD_SHARE,
+   BUYER_TEAM_MULTISIG_SHARE, SELLER_TEAM_MULTISIG_SHARE,
 };
 use crate::error;
 use anchor_lang::prelude::*;
@@ -98,19 +97,17 @@ pub fn assert_pubkey_equal_from_array(pubkey_list: Vec<AssertPubkey>) -> Result<
 }
 
 pub fn distribute_amount<'a>(
-    listing_amount: u64,
+    offer_amount: u64,
     allowed_royalty: u16,
     receiver: &AccountInfo<'a>,
     from: &AccountInfo<'a>,
     team_multisig_vault: &AccountInfo<'a>,
-    trader_vault: &AccountInfo<'a>,
-    staking_vault: &AccountInfo<'a>,
     nft_metadata: &AccountInfo<'a>,
     remaining_accounts: &[AccountInfo<'a>],
     seeds: &[&[u8]],
 ) -> Result<()> {
     let decoded_metadata = Metadata::from_account_info(nft_metadata)?;
-    let listing_amount = listing_amount as f64 / LAMPORTS_PER_SOL as f64;
+    let offer_amount = offer_amount as f64 / LAMPORTS_PER_SOL as f64;
 
     let mut allowed_royalty_share: f64 = allowed_royalty as f64 / 10000 as f64;
 
@@ -119,11 +116,11 @@ pub fn distribute_amount<'a>(
         msg!("no_creators_found::defaulting_royalty_to_0");
     }
 
-    let creators_share = listing_amount * allowed_royalty_share;
+    let creators_share = offer_amount * allowed_royalty_share;
 
     // msg!(
     //     "original amount {}",
-    //     listing_amount * LAMPORTS_PER_SOL as f64
+    //     offer_amount * LAMPORTS_PER_SOL as f64
     // );
 
     // msg!(
@@ -171,10 +168,10 @@ pub fn distribute_amount<'a>(
         msg!("royalty share 0")
     }
 
-    let buyer_team_multisig_fee = listing_amount * (BUYER_TEAM_MULTISIG_SHARE / 100 as f64);
+    let buyer_team_multisig_fee = offer_amount * (BUYER_TEAM_MULTISIG_SHARE / 100 as f64);
     let buyer_amount_to_team = buyer_team_multisig_fee * LAMPORTS_PER_SOL as f64;
 
-    let seller_team_multisig_fee = listing_amount * (SELLER_TEAM_MULTISIG_SHARE / 100 as f64);
+    let seller_team_multisig_fee = offer_amount * (SELLER_TEAM_MULTISIG_SHARE / 100 as f64);
     let seller_amount_to_team = seller_team_multisig_fee * LAMPORTS_PER_SOL as f64;
 
     // msg!("amount to team {}", amount_to_team);
@@ -194,29 +191,7 @@ pub fn distribute_amount<'a>(
             &[],
         )?;
 
-        let trader_share = listing_amount * (TRADING_REWARD_SHARE / 100 as f64);
-        let amount_to_trader = trader_share * LAMPORTS_PER_SOL as f64;
-
-        // msg!("amount to team {}", amount_to_trader);
-        transfer_sol(
-            &from.clone(),
-            &trader_vault.clone(),
-            amount_to_trader as u64,
-            &[],
-        )?;
-
-        let staker_share = listing_amount * (STAKING_SHARE / 100 as f64);
-        let amount_to_staker = staker_share * LAMPORTS_PER_SOL as f64;
-
-        // msg!("amount to team {}", amount_to_staker);
-        transfer_sol(
-            &from.clone(),
-            &staking_vault.clone(),
-            amount_to_staker as u64,
-            &[],
-        )?;
-
-        let seller_amount = listing_amount - creators_share - seller_team_multisig_fee;
+        let seller_amount = offer_amount - creators_share - seller_team_multisig_fee;
 
         let amount_to_seller = seller_amount * LAMPORTS_PER_SOL as f64;
         // msg!("amount to seller {}", amount_to_seller);
@@ -241,29 +216,7 @@ pub fn distribute_amount<'a>(
             seeds,
         )?;
 
-        let trader_share = listing_amount * (TRADING_REWARD_SHARE / 100 as f64);
-        let amount_to_trader = trader_share * LAMPORTS_PER_SOL as f64;
-
-        // msg!("amount to team {}", amount_to_trader);
-        transfer_sol(
-            &from.clone(),
-            &trader_vault.clone(),
-            amount_to_trader as u64,
-            seeds,
-        )?;
-
-        let staker_share = listing_amount * (STAKING_SHARE / 100 as f64);
-        let amount_to_staker = staker_share * LAMPORTS_PER_SOL as f64;
-
-        // msg!("amount to team {}", amount_to_staker);
-        transfer_sol(
-            &from.clone(),
-            &staking_vault.clone(),
-            amount_to_staker as u64,
-            seeds,
-        )?;
-
-        let seller_amount = listing_amount - creators_share - seller_team_multisig_fee;
+        let seller_amount = offer_amount - creators_share - seller_team_multisig_fee;
         let amount_to_seller = seller_amount * LAMPORTS_PER_SOL as f64;
         // msg!("amount to seller {}", amount_to_seller);
         transfer_sol(

@@ -32,7 +32,7 @@ pub fn process_create_direct_offer(
     offered_amount: u64,
     endtime: u64,
 ) -> Result<()> {
-    let direct_offer_state = &mut ctx.accounts.direct_offer_state;
+    let direct_offer_state: &mut Account<'_, DirectOfferState> = &mut ctx.accounts.direct_offer_state;
     let buyer = &mut ctx.accounts.buyer;
     let nft_metadata = &mut ctx.accounts.nft_metadata;
     let buyer_pda_wallet = &mut ctx.accounts.buyer_pda_wallet;

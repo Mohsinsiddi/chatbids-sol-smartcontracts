@@ -7,20 +7,15 @@ pub mod utils;
 
 use crate::processor::{
     accept_direct_offer::*, close_direct_offer::*,
-    create_direct_offer::*, fund_withdraw_pda_wallet::*,
-    initialize::*
+    create_direct_offer::*, fund_withdraw_pda_wallet::*,update_direct_offer::*
 };
 use anchor_lang::prelude::*;
 
-declare_id!("855UzS1Q9FPctVzgUzL8k4P7dT3aAdF3k7uoXDdWUvEV");
+declare_id!("ZzS7SCJrNP4qw7yjEM8WeKYNa1HtEPnFWokof6D5nku");
 
 #[program]
 pub mod chatbids {
     use super::*;
-
-    pub fn initialize(_ctx: Context<Initialize>) -> Result<()>{
-        return process_initialize(_ctx);
-    }
 
     pub fn fund_withdraw_pda_wallet(
         ctx: Context<FundWithdrawPdaWalletAccounts>,
@@ -42,12 +37,15 @@ pub mod chatbids {
         return process_close_direct_offer(ctx);
     }
 
+    pub fn update_direct_offer(ctx:Context<UpdateDirectOfferAccounts>,offered_amount: u64,endtime: u64) -> Result<()> {
+       return process_update_offer(ctx, offered_amount, endtime);
+    }
+
     pub fn accept_direct_offer<'info>(
         ctx: Context<'_, '_, '_, 'info, AcceptDirectOffer<'info>>,
         allowed_royalty: u16,
-        end_day_timestamp: u64,
     ) -> Result<()> {
-        return process_accept_direct_offer(ctx, allowed_royalty, end_day_timestamp);
+        return process_accept_direct_offer(ctx, allowed_royalty);
     }
 
 }
